@@ -1,0 +1,29 @@
+
+package repositories;
+
+import java.util.Collection;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import domain.Workout;
+
+@Repository
+public interface WorkoutRepository extends JpaRepository<Workout, Integer> {
+
+	@Query("select w from Workout w where w.gym.id = ?1")
+	Collection<Workout> findByGym(int gymId);
+
+	@Query("select w from Workout w where w.title like %?1% or w.description like %?1%")
+	Collection<Workout> findByKeyword(String keyword);
+
+	@Query("select w from Workout w join w.steps s where s.id = ?1")
+	Workout findByStep(int stepId);
+
+	@Query("select min(g.workouts.size), max(g.workouts.size), avg(g.workouts.size) from Gym g")
+	Collection<Object[]> sixthQuery();
+
+	@Query("select w from Workout w order by w.steps.size DESC")
+	Collection<Workout> eighthQuery();
+}

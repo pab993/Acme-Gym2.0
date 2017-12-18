@@ -1,0 +1,302 @@
+
+package services;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.Validator;
+
+import repositories.ActivityRepository;
+import domain.Activity;
+import domain.Customer;
+import domain.Gym;
+import domain.Manager;
+import domain.Trainer;
+
+@Service
+@Transactional
+public class ActivityService {
+
+	//Managed Repository =============================================================================
+
+	@Autowired
+	private ActivityRepository	activityRepository;
+
+	@Autowired
+	private ManagerService		managerService;
+
+	@Autowired
+	private TrainerService		trainerService;
+
+	@Autowired
+	private CustomerService		customerService;
+
+	@Autowired
+	private Validator			validator;
+
+
+	//Simple CRUD methods ============================================================================
+
+	public Activity create(Gym gym) {
+		Activity result;
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.isTrue(manager != null && manager.getGyms().contains(gym));
+
+		result = new Activity();
+
+		Collection<Trainer> trainers = new ArrayList<Trainer>();
+		Collection<Customer> customers = new ArrayList<Customer>();
+
+		result.setGym(gym);
+		result.setCancelled(false);
+		result.setCustomers(customers);
+		result.setTrainers(trainers);
+
+		return result;
+	}
+
+	public Activity save(Activity activity) {
+		Assert.notNull(activity);
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.isTrue(activity.getGym().getManager().equals(manager));
+		Activity result;
+
+		result = activityRepository.save(activity);
+
+		return result;
+	}
+
+	public Activity save2(Activity activity) {
+		Assert.notNull(activity);
+
+		Activity result;
+
+		result = activityRepository.save(activity);
+
+		return result;
+	}
+
+	public Activity save3(Activity activity) {
+		Assert.notNull(activity);
+
+		Activity result;
+
+		Collection<Trainer> trainers = trainerService.findTrainers(activity.getGym().getId());
+
+		result = activityRepository.save(activity);
+
+		for (Trainer trainer : trainers) {
+			if (activity.getTrainers().contains(trainer)) {
+				trainer.getActivities().add(activity);
+				trainerService.save(trainer);
+			}
+
+		}
+
+		return result;
+	}
+
+	public Collection<Activity> findAll() {
+		// TODO Auto-generated method stub
+		Collection<Activity> activities;
+
+		activities = activityRepository.findAll();
+
+		return activities;
+	}
+
+	//Other Business Methods =========================================================================
+
+	public Collection<Activity> findActivitiesByGymId(int gymId) {
+
+		Collection<Activity> activities;
+
+		activities = activityRepository.findActivitiesByGymId(gymId);
+		return activities;
+	}
+
+	public Collection<Activity> findActivitiesOfGymId(int gymId) {
+
+		Collection<Activity> activities;
+
+		activities = activityRepository.findActivitiesOfGymId(gymId);
+		return activities;
+	}
+
+	public Collection<Activity> findActivitiesNotClosed() {
+
+		Collection<Activity> activities;
+
+		activities = activityRepository.findActivitiesNotClosed();
+		return activities;
+	}
+
+	public Activity findOne(int activityId) {
+		// TODO Auto-generated method stub
+		Activity activity;
+
+		activity = activityRepository.findOne(activityId);
+
+		return activity;
+	}
+
+	public Collection<Activity> search(String keyword, String day, String time) {
+		Collection<Activity> activities;
+
+		activities = activityRepository.search(keyword, day, time);
+
+		return activities;
+	}
+
+	public Activity reconstruct(Activity activity, BindingResult binding) {
+		Activity result;
+
+		Manager manager = managerService.findByPrincipal();
+
+		result = activity;
+		Assert.isTrue(manager.getGyms().contains(activity.getGym()));
+		result.setCancelled(false);
+
+		comprobarHorarios(activity.getStartTime(), activity.getEndTime(), binding);
+		comprobarTrainers(activity.getTrainers(), binding);
+
+		validator.validate(result, binding);
+
+		return result;
+	}
+
+	public Activity reconstruct2(Activity activity, BindingResult binding) {
+		Activity result;
+
+		Manager manager = managerService.findByPrincipal();
+
+		result = findOne(activity.getId());
+		Assert.isTrue(manager.getGyms().contains(activity.getGym()));
+		result.setTrainers(activity.getTrainers());
+
+		validator.validate(result, binding);
+
+		return result;
+	}
+
+	private boolean comprobarHorarios(String startTime, String endTime, BindingResult binding) {
+		FieldError error;
+		String[] codigos;
+		boolean result;
+
+		if (startTime == null || startTime.isEmpty()) {
+			result = true;
+		} else {
+			result = false;
+		}
+
+		if (!result) {
+			if (startTime.matches("^[0-2]{1}[0-9]{1}[:][0-5]{1}[0-9]{1}$")) {
+
+				String segundaPosicion = startTime.substring(1, 2); // 26:00
+				String primeraPosicion = startTime.substring(0, 1);
+				int numSP = Integer.parseInt(segundaPosicion);
+				int numPP = Integer.parseInt(primeraPosicion);
+
+				if (numPP == 2 && numSP > 3) {
+					codigos = new String[1];
+					codigos[0] = "activity.startTime.error";
+					error = new FieldError("activity", "startTime", startTime, false, codigos, null, "");
+					binding.addError(error);
+				}
+			}
+			if (endTime.matches("^[0-2]{1}[0-9]{1}[:][0-5]{1}[0-9]{1}$")) {
+				String segundaPosicion = endTime.substring(1, 2); // 26:00
+				String primeraPosicion = endTime.substring(0, 1);
+				int numSP = Integer.parseInt(segundaPosicion);
+				int numPP = Integer.parseInt(primeraPosicion);
+
+				if (numPP == 2 && numSP > 3) {
+					codigos = new String[1];
+					codigos[0] = "activity.endTime.error";
+					error = new FieldError("activity", "endTime", endTime, false, codigos, null, "");
+					binding.addError(error);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private boolean comprobarTrainers(Collection<Trainer> trainers, BindingResult binding) {
+		FieldError error;
+		String[] codigos;
+		boolean result;
+
+		if (trainers == null || trainers.isEmpty()) {
+			result = true;
+		} else {
+			result = false;
+		}
+
+		if (result) {
+			codigos = new String[1];
+			codigos[0] = "activity.trainers.error";
+			error = new FieldError("activity", "trainers", trainers, false, codigos, null, "");
+			binding.addError(error);
+
+		}
+
+		return result;
+	}
+
+	public Activity cancelActivity(Activity activity) {
+
+		activity.setCancelled(true);
+		Activity activitySaved = save(activity);
+
+		return activitySaved;
+	}
+
+	public Collection<Activity> findActivitiesByTrainer(int trainerId) {
+		Collection<Activity> activities;
+
+		activities = activityRepository.findActivitiesByTrainer(trainerId);
+
+		return activities;
+	}
+
+	public Activity join(Activity activity) {
+
+		Customer principal = customerService.findByPrincipal();
+
+		activity.getCustomers().add(principal);
+		principal.getActivities().add(activity);
+
+		Activity saved = activityRepository.save(activity);
+		customerService.save(principal);
+
+		return saved;
+	}
+
+	public Activity leave(Activity activity) {
+		// TODO Auto-generated method stub
+
+		Customer principal = customerService.findByPrincipal();
+
+		activity.getCustomers().remove(principal);
+		principal.getActivities().remove(activity);
+
+		Activity saved = activityRepository.save(activity);
+		customerService.save(principal);
+
+		return saved;
+	}
+
+}

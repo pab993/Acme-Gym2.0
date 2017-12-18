@@ -1,0 +1,346 @@
+
+package controllers;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import services.AnnotationService;
+import services.GymService;
+import services.ManagerService;
+import services.WorkoutService;
+import domain.Annotation;
+import domain.Gym;
+import domain.Manager;
+import domain.Workout;
+
+@Controller
+@RequestMapping("/workout")
+public class WorkoutController extends AbstractController {
+
+	// Constructors -----------------------------------------------------------
+
+	public WorkoutController() {
+		super();
+	}
+
+
+	//Services
+	// ============================================================================
+
+	@Autowired
+	private WorkoutService		workoutService;
+
+	@Autowired
+	private GymService			gymService;
+
+	@Autowired
+	private ManagerService		managerService;
+
+	@Autowired
+	private AnnotationService	annotationService;
+
+
+	//Listing
+	// ============================================================================
+
+	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	public ModelAndView list(@RequestParam int gymId) {
+		ModelAndView result;
+		Collection<Workout> workouts;
+		Gym gym;
+		Boolean var = false;
+
+		workouts = workoutService.findByGym(gymId);
+		gym = gymService.findOne(gymId);
+
+		if (gym == null) {
+			result = new ModelAndView("redirect:/panic/misc.do");
+		} else {
+
+			result = new ModelAndView("workout/list");
+			result.addObject("var", var);
+			result.addObject("gym", gym);
+			result.addObject("requestURI", "workout/list.do");
+			result.addObject("workouts", workouts);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/listLogin", method = RequestMethod.GET)
+	public ModelAndView listLogin(@RequestParam int gymId) {
+		ModelAndView result;
+		Collection<Workout> workouts;
+		Gym gym;
+		Boolean var = false;
+
+		Manager principal = managerService.findByPrincipal();
+
+		workouts = workoutService.findByGym(gymId);
+		gym = gymService.findOne(gymId);
+
+		if (gym == null) {
+			result = new ModelAndView("redirect:/panic/misc.do");
+		} else {
+
+			result = new ModelAndView("workout/list");
+			result.addObject("principal", principal);
+			result.addObject("var", var);
+			result.addObject("gym", gym);
+			result.addObject("requestURI", "workout/list.do");
+			result.addObject("workouts", workouts);
+		}
+		return result;
+	}
+
+	// Search
+	// ===========================================================================
+
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
+	public ModelAndView search() {
+		ModelAndView result;
+		Collection<Workout> workouts = new ArrayList<Workout>();
+		Boolean var = false;
+
+		workouts = workoutService.findAllOpened();
+
+		result = new ModelAndView("workout/search");
+
+		result.addObject("var", var);
+		result.addObject("requestURI", "workout/search.do");
+		result.addObject("workouts", workouts);
+
+		return result;
+
+	}
+
+	@RequestMapping(value = "/searchLogin", method = RequestMethod.GET)
+	public ModelAndView searchLogin() {
+		ModelAndView result;
+		Collection<Workout> workouts = new ArrayList<Workout>();
+		Boolean var = false;
+		Manager principal = managerService.findByPrincipal();
+
+		workouts = workoutService.findAllOpened();
+
+		result = new ModelAndView("workout/search");
+
+		result.addObject("var", var);
+		result.addObject("principal", principal);
+		result.addObject("requestURI", "workout/searchLogin.do");
+		result.addObject("workouts", workouts);
+
+		return result;
+
+	}
+
+	@RequestMapping(value = "/search", method = RequestMethod.POST)
+	public ModelAndView search(@RequestParam("keyword") final String keyword) {
+		ModelAndView result;
+		Collection<Workout> workouts;
+		Boolean var = false;
+
+		workouts = workoutService.findByKeyword(keyword);
+
+		result = new ModelAndView("workout/search");
+		result.addObject("var", var);
+		result.addObject("requestURI", "workout/search.do");
+		result.addObject("workouts", workouts);
+
+		return result;
+	}
+
+	@RequestMapping(value = "/searchLogin", method = RequestMethod.POST)
+	public ModelAndView searchLogin(@RequestParam("keyword") final String keyword) {
+		ModelAndView result;
+		Collection<Workout> workouts;
+		Boolean var = false;
+
+		Manager principal = managerService.findByPrincipal();
+
+		workouts = workoutService.findByKeyword(keyword);
+
+		result = new ModelAndView("workout/search");
+		result.addObject("principal", principal);
+		result.addObject("var", var);
+		result.addObject("requestURI", "workout/searchLogin.do");
+		result.addObject("workouts", workouts);
+
+		return result;
+	}
+
+	//Creating
+	// ===========================================================================
+
+	@RequestMapping(value = "/create", method = RequestMethod.GET)
+	public ModelAndView create(@RequestParam int gymId) {
+		ModelAndView result;
+
+		Gym gym = gymService.findOne(gymId);
+
+		if (gym == null) {
+			result = new ModelAndView("redirect:/panic/misc.do");
+		} else {
+			Workout workout = workoutService.create(gymId);
+			result = this.createEditModelAndView(workout);
+		}
+		return result;
+	}
+
+	//Edit
+	// =========================================================================================
+
+	@RequestMapping(value = "/edit", method = RequestMethod.GET)
+	public ModelAndView edit(@RequestParam final int workoutId) {
+		ModelAndView result;
+		Workout workout = workoutService.findOne(workoutId);
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.isTrue(workout.getGym().getManager().equals(manager));
+
+		result = this.createEditModelAndView(workout);
+		return result;
+	}
+
+	@RequestMapping(value = "/details", method = RequestMethod.GET)
+	public ModelAndView details(@RequestParam final int workoutId) {
+		ModelAndView result;
+		Workout workout = workoutService.findOne(workoutId);
+
+		result = this.createEditModelAndView2(workout);
+		return result;
+	}
+
+	@RequestMapping(value = "/detailsLogin", method = RequestMethod.GET)
+	public ModelAndView detailsLogin(@RequestParam final int workoutId) {
+		ModelAndView result;
+		Workout workout = workoutService.findOne(workoutId);
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.isTrue(workout.getGym().getManager().equals(manager));
+
+		result = this.createEditModelAndView3(workout);
+		return result;
+	}
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST, params = "save")
+	public ModelAndView save(Workout workoutPruned, BindingResult binding) {
+		ModelAndView result;
+
+		Workout workout = workoutService.reconstruct(workoutPruned, binding);
+
+		if (binding.hasErrors()) {
+			result = createEditModelAndView(workout);
+		} else {
+			try {
+
+				workoutService.save(workout);
+				result = new ModelAndView("redirect:/workout/listLogin.do?gymId=" + workout.getGym().getId());
+
+			} catch (Throwable oops) {
+
+				result = createEditModelAndView(workout, "workout.commit.error");
+			}
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST, params = "delete")
+	public ModelAndView delete(Workout workoutPruned, BindingResult binding) {
+		ModelAndView result;
+
+		Workout workout = workoutService.findOne(workoutPruned.getId());
+
+		try {
+			workoutService.delete(workout);
+
+			result = new ModelAndView("redirect:/workout/listLogin.do?gymId=" + workout.getGym().getId());
+		} catch (Throwable oops) {
+			result = createEditModelAndView(workout, "workout.commit.error");
+		}
+		return result;
+	}
+
+	// Ancillary Methods
+	// ===============================================================================
+
+	protected ModelAndView createEditModelAndView(Workout workout) {
+		ModelAndView result;
+
+		result = createEditModelAndView(workout, null);
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView(Workout workout, String message) {
+		ModelAndView result;
+
+		result = new ModelAndView("workout/edit");
+
+		result.addObject("gymId", workout.getGym().getId());
+		result.addObject("workout", workout);
+		result.addObject("message", message);
+
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView2(Workout workout) {
+		ModelAndView result;
+
+		result = createEditModelAndView2(workout, null);
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView2(Workout workout, String message) {
+		ModelAndView result;
+
+		result = new ModelAndView("workout/details");
+
+		//		result.addObject("gymId", workout.getGym().getId());
+		result.addObject("workout", workout);
+		result.addObject("steps", workout.getSteps());
+		result.addObject("annotations", workout.getAnnotations());
+		Annotation annotation = annotationService.create(workout.getId());
+		result.addObject("requestURI", "workout/details.do");
+		result.addObject("annotation", annotation);
+		result.addObject("message", message);
+
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView3(Workout workout) {
+		ModelAndView result;
+
+		result = createEditModelAndView3(workout, null);
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView3(Workout workout, String message) {
+		ModelAndView result;
+
+		Manager principal = managerService.findByPrincipal();
+
+		result = new ModelAndView("workout/details");
+
+		result.addObject("principal", principal);
+		result.addObject("workout", workout);
+		result.addObject("steps", workout.getSteps());
+		result.addObject("annotations", workout.getAnnotations());
+		Annotation annotation = annotationService.create(workout.getId());
+		result.addObject("requestURI", "workout/detailsLogin.do");
+		result.addObject("annotation", annotation);
+		result.addObject("message", message);
+
+		return result;
+	}
+
+}

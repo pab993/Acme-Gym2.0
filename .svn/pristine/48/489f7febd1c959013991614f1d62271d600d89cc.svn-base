@@ -1,0 +1,33 @@
+# messages.properties
+#
+# Copyright (C) 2017 Universidad de Sevilla
+# 
+# The use of this project is hereby constrained to the conditions of the 
+# TDG Licence, a copy of which you may download from 
+# http://www.tdg-seville.info/License.html
+
+administrator.action.1	= This is the administrator's action 1
+administrator.action.2	= This is the administrator's action 2
+
+manager.name					=	Name
+manager.surname					=	Surname
+manager.email					=	Email
+manager.phone					=	Phone
+manager.postalAddress			=	Postal Address
+manager.city					=	City
+manager.country					=	Country
+manager.cancel					=	Back to the main page
+manager.confirm.ban				= Are you sure you want to ban it?
+manager.ban						= Ban
+manager.unban					= Unban
+
+firstQuery						= The minimum, the maximum, the average, and the standard deviation of the number of gyms per manager.
+secondQuery						= The minimum, the maximum, the average, and the standard deviation of the number of gyms per customer.
+thirstQuery						= The minimum, the maximum, the average, and the standard deviation of the number of customers per gym.
+forthQuery						= The gym that offers more activities. The count must disregard activities that are cancelled.
+fifthQuery						= The customers who have joined more activities.
+
+dashboard.min					= Minimum
+dashboard.max					= Maximum
+dashboard.avg					= Average
+dashboard.ds					= Standar desviation

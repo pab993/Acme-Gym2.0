@@ -1,0 +1,138 @@
+
+package services;
+
+import java.util.Collection;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.Validator;
+
+import repositories.StepRepository;
+import domain.Manager;
+import domain.Step;
+import domain.Workout;
+
+@Service
+@Transactional
+public class StepService {
+
+	//Managed Repository =============================================================================
+
+	@Autowired
+	private StepRepository	stepRepository;
+
+	//Services
+	// ===============================================================================================
+
+	@Autowired
+	private WorkoutService	workoutService;
+
+	@Autowired
+	private ManagerService	managerService;
+
+	@Autowired
+	private Validator		validator;
+
+
+	//SCRUDs Methods
+	//===============================================================================================
+
+	public Step create(Workout workout) {
+		Step result;
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.notNull(manager);
+
+		result = new Step();
+		result.setWorkout(workout);
+
+		return result;
+	}
+
+	public Step save(Step step) {
+		Assert.notNull(step);
+
+		Manager manager = managerService.findByPrincipal();
+		Assert.isTrue(step.getWorkout().getGym().getManager().equals(manager));
+
+		stepRepository.save(step);
+
+		return step;
+	}
+
+	public Step findOne(int StepId) {
+		// TODO Auto-generated method stub
+		Step step;
+
+		step = stepRepository.findOne(StepId);
+
+		return step;
+	}
+
+	public Collection<Step> findAll() {
+		// TODO Auto-generated method stub
+		Collection<Step> steps;
+
+		steps = stepRepository.findAll();
+
+		return steps;
+	}
+
+	public Step reconstruct(Step step, BindingResult binding) {
+		Step result;
+
+		if (step.getId() == 0) {
+			result = step;
+			validator.validate(result, binding);
+		} else {
+			Step res = stepRepository.findOne(step.getId());
+			result = step;
+
+			result.setWorkout(res.getWorkout());
+
+			validator.validate(result, binding);
+		}
+
+		comprobarNumero(step, binding);
+
+		return result;
+	}
+
+	private boolean comprobarNumero(Step step, BindingResult binding) {
+		FieldError error;
+		String[] codigos;
+		boolean result;
+
+		Workout workout = workoutService.findOne(step.getWorkout().getId());
+		result = false;
+		for (Step s : workout.getSteps()) {
+			if (s.getNumber() == step.getNumber() && s.getId() != step.getId()) {
+				result = true;
+			}
+		}
+
+		if (result) {
+			codigos = new String[1];
+			codigos[0] = "step.number.error";
+			error = new FieldError("step", "number", step.getNumber(), false, codigos, null, "");
+			binding.addError(error);
+
+		}
+
+		return result;
+	}
+
+	public Collection<Object[]> seventhQuery() {
+
+		Collection<Object[]> eighth = stepRepository.seventhQuery();
+
+		return eighth;
+	}
+
+}

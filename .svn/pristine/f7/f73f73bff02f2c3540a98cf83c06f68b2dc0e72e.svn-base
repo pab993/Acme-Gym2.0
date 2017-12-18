@@ -1,0 +1,26 @@
+# messages.properties
+#
+# Copyright (C) 2017 Universidad de Sevilla
+# 
+# The use of this project is hereby constrained to the conditions of the 
+# TDG Licence, a copy of which you may download from 
+# http://www.tdg-seville.info/License.html
+
+gym.name						= Name
+gym.logo						= Logo
+gym.address						= Address
+gym.fee							= Fee
+gym.listActivities				= List of activities
+gym.cancel						= Back to the main page
+gym.create						= Create gym
+gym.edit						= Edit
+gym.delete						= Delete
+gym.submit						= Save changes
+gym.confirm						= Are you sure?
+gym.closed						= State
+gym.status.open					= Opened
+gym.status.closed				= Closed
+gym.joinGym						= Join the gym
+gym.leaveGym					= Leave the gym
+
+gym.commit.error				= Cannot commit this operation

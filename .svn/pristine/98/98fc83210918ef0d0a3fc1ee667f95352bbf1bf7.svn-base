@@ -1,0 +1,124 @@
+
+package controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import services.ManagerService;
+import services.StepService;
+import services.WorkoutService;
+import domain.Manager;
+import domain.Step;
+import domain.Workout;
+
+@Controller
+@RequestMapping("/step")
+public class StepController extends AbstractController {
+
+	// Constructors -----------------------------------------------------------
+
+	public StepController() {
+		super();
+	}
+
+
+	//Services
+	// ============================================================================
+
+	@Autowired
+	private StepService		stepService;
+
+	@Autowired
+	private WorkoutService	workoutService;
+
+	@Autowired
+	private ManagerService	managerService;
+
+
+	//Creating
+	// ===========================================================================
+
+	@RequestMapping(value = "/create", method = RequestMethod.GET)
+	public ModelAndView create(@RequestParam int workoutId) {
+		ModelAndView result;
+
+		Workout workout = workoutService.findOne(workoutId);
+		Manager manager = managerService.findByPrincipal();
+
+		if (workout == null) {
+			result = new ModelAndView("redirect:/panic/misc.do");
+		} else {
+			Assert.isTrue(workout.getGym().getManager().equals(manager));
+			Step step = stepService.create(workout);
+			result = this.createEditModelAndView(step);
+		}
+		return result;
+	}
+
+	//Edit
+	// =========================================================================================
+
+	@RequestMapping(value = "/edit", method = RequestMethod.GET)
+	public ModelAndView edit(@RequestParam final int stepId) {
+		ModelAndView result;
+		Workout workout = workoutService.findByStep(stepId);
+		Step step = stepService.findOne(stepId);
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.isTrue(workout.getGym().getManager().equals(manager));
+
+		result = this.createEditModelAndView(step);
+		return result;
+	}
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST, params = "save")
+	public ModelAndView save(Step stepPruned, BindingResult binding) {
+		ModelAndView result;
+
+		Step step = stepService.reconstruct(stepPruned, binding);
+
+		if (binding.hasErrors()) {
+			result = createEditModelAndView(step);
+		} else {
+			try {
+
+				stepService.save(step);
+				result = new ModelAndView("redirect:/workout/detailsLogin.do?workoutId=" + step.getWorkout().getId());
+
+			} catch (Throwable oops) {
+
+				result = createEditModelAndView(step, "step.commit.error");
+			}
+		}
+		return result;
+	}
+
+	// Ancillary Methods
+	// ===============================================================================
+
+	protected ModelAndView createEditModelAndView(Step step) {
+		ModelAndView result;
+
+		result = createEditModelAndView(step, null);
+		return result;
+	}
+
+	protected ModelAndView createEditModelAndView(Step step, String message) {
+		ModelAndView result;
+
+		result = new ModelAndView("step/edit");
+
+		result.addObject("step", step);
+		result.addObject("message", message);
+
+		return result;
+	}
+
+}

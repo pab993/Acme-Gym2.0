@@ -1,0 +1,33 @@
+# messages_es.properties
+#
+# Copyright (C) 2017 Universidad de Sevilla
+# 
+# The use of this project is hereby constrained to the conditions of the 
+# TDG Licence, a copy of which you may download from 
+# http://www.tdg-seville.info/License.html
+
+trainer.accountData					= Datos de la nueva cuenta
+trainer.username					= Nombre de usuario
+trainer.password					= Contraseña
+trainer.repeatPassword				= Repetir contraseña
+trainer.personalData				= Datos personales
+trainer.name						= Nombre
+trainer.surname						= Apellidos
+trainer.phone						= Número de teléfono
+trainer.email						= Correo electrónico
+trainer.postalAddress				= Dirección postal
+trainer.city						= Ciudad
+trainer.country						= País
+trainer.accept						= Acepto
+trainer.lopd						= Términos y condiciones
+trainer.submit						= Registrar nuevo entrenador
+trainer.submit2						= Asignar
+trainer.assign						= Asignar a un gimnasio
+choose.gym							= Asignar al gimnasio:(*)
+
+trainer.cancel						= Volver a la página principal
+trainer.cancel2						= Volver atrás
+trainer.password.mismatch			= Las contraseñas no pueden estar en blanco y deben coincidir
+trainer.postalAddress.error			= El patrón del código postal no es correcto
+trainer.save.error					= No se ha podido realizar esta operación
+trainer.search						= Buscar entrenador

@@ -1,0 +1,80 @@
+
+package services;
+
+import java.util.Collection;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import repositories.StepRepository;
+import domain.Manager;
+import domain.Step;
+import domain.Workout;
+
+@Service
+@Transactional
+public class StepService {
+
+	//Managed Repository =============================================================================
+
+	@Autowired
+	private StepRepository	stepRepository;
+
+	//Services
+	// ===============================================================================================
+
+	@Autowired
+	private WorkoutService	workoutService;
+
+	@Autowired
+	private ManagerService	managerService;
+
+
+	//SCRUDs Methods
+	//===============================================================================================
+
+	public Step create() {
+		Step result;
+
+		Manager manager = managerService.findByPrincipal();
+
+		Assert.notNull(manager);
+
+		result = new Step();
+
+		return result;
+	}
+
+	public Workout save(Step step, int workoutId) {
+		Assert.notNull(step);
+
+		Workout workout = workoutService.findOne(workoutId);
+		workout.getSteps().add(step);
+
+		workoutService.save(workout);
+
+		return workout;
+	}
+
+	public Step findOne(int StepId) {
+		// TODO Auto-generated method stub
+		Step step;
+
+		step = stepRepository.findOne(StepId);
+
+		return step;
+	}
+
+	public Collection<Step> findAll() {
+		// TODO Auto-generated method stub
+		Collection<Step> steps;
+
+		steps = stepRepository.findAll();
+
+		return steps;
+	}
+
+}

@@ -1,0 +1,121 @@
+
+package domain;
+
+import java.util.Collection;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.SafeHtml;
+import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
+
+@Entity
+@Access(AccessType.PROPERTY)
+public class Gym extends DomainEntity {
+
+	//Attributes
+	// ===============================================================
+
+	private String	logo;
+	private String	name;
+	private String	address;
+	private Double	fee;
+	private Boolean	closed;
+
+
+	@SafeHtml(whitelistType = WhiteListType.NONE)
+	@NotBlank
+	public String getLogo() {
+		return logo;
+	}
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	@SafeHtml(whitelistType = WhiteListType.NONE)
+	@NotBlank
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@SafeHtml(whitelistType = WhiteListType.NONE)
+	@NotBlank
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	@NotNull
+	@Min(0)
+	public Double getFee() {
+		return fee;
+	}
+	public void setFee(Double fee) {
+		this.fee = fee;
+	}
+
+	public Boolean getClosed() {
+		return closed;
+	}
+	public void setClosed(Boolean closed) {
+		this.closed = closed;
+	}
+
+
+	//Relationships
+	// =======================================================
+
+	private Manager					manager;
+	private Collection<Trainer>		trainers;
+	private Collection<Activity>	activities;
+	private Collection<Customer>	customers;
+
+
+	@Valid
+	@NotNull
+	@ManyToOne(optional = false)
+	public Manager getManager() {
+		return manager;
+	}
+	public void setManager(Manager manager) {
+		this.manager = manager;
+	}
+
+	@OneToMany(mappedBy = "gym")
+	public Collection<Trainer> getTrainers() {
+		return trainers;
+	}
+	public void setTrainers(Collection<Trainer> trainers) {
+		this.trainers = trainers;
+	}
+
+	@OneToMany(mappedBy = "gym")
+	public Collection<Activity> getActivities() {
+		return activities;
+	}
+	public void setActivities(Collection<Activity> activities) {
+		this.activities = activities;
+	}
+
+	@ManyToMany
+	public Collection<Customer> getCustomers() {
+		return customers;
+	}
+	public void setCustomers(Collection<Customer> customers) {
+		this.customers = customers;
+	}
+
+}

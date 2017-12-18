@@ -1,0 +1,33 @@
+# messages_es.properties
+#
+# Copyright (C) 2017 Universidad de Sevilla
+# 
+# The use of this project is hereby constrained to the conditions of the 
+# TDG Licence, a copy of which you may download from 
+# http://www.tdg-seville.info/License.html
+
+administrator.action.1	= Esta es la acción 1 del administrador
+administrator.action.2	= Esta es la acción 2 del administrador
+
+manager.name					=	Nombre
+manager.surname					=	Apellidos
+manager.email					=	Correo electrónico
+manager.phone					=	Teléfono
+manager.postalAddress			=	Dirección postal
+manager.city					=	Ciudad
+manager.country					=	País
+manager.cancel					=	Volver a la página principal
+manager.confirm.ban				= ¿Seguro que quieres banearlo?
+manager.ban						= Banear
+manager.unban					= Desbanear
+
+firstQuery						= El mínimo, el máximo, la media y la desviación estandar del número de gimnasios por manager.
+secondQuery						= El mínimo, el máximo, la media y la desviación estandar del número de gimnasios por clientes.
+thirstQuery						= El mínimo, el máximo, la media y la desviación estandar del número de clientes por gimnasio.
+forthQuery						= El/Los gimnasio/s que ofrecen más actividades.
+fifthQuery						= Los clientes que se han unido a más actividades.
+
+dashboard.min					= Mínimo
+dashboard.max					= Máximo
+dashboard.avg					= Media
+dashboard.ds					= Desviación estandar

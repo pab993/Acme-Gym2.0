@@ -1,0 +1,33 @@
+# messages.properties
+#
+# Copyright (C) 2017 Universidad de Sevilla
+# 
+# The use of this project is hereby constrained to the conditions of the 
+# TDG Licence, a copy of which you may download from 
+# http://www.tdg-seville.info/License.html
+
+workout.title						=	Title
+workout.description					=	Description
+workout.details						=	Details
+workout.edit						=	Edit
+workout.cancel						=	Back to the main page
+workout.cancel2						=	Back
+workout.submit						=	Save
+workout.delete						=	Delete
+workout.confirm						=	Are you sure?
+workout.create						=	Create a new workout
+
+workout.commit.error				=	 Cannot commit this operation
+
+step.number							=	Sequence
+step.description					=	Description
+step.videoTutorial					=	Video-Tutorial
+step.edit							= 	Edit
+step.create							= 	Add new step
+steps.header						=	Steps
+	
+annotation.actor					= User
+annotation.text						= Annotation
+annotation.edit						= Publish
+annotation.header					= Annotations
+annotation.commit.error				= Cannot publish the annotation
